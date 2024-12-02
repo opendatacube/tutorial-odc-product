@@ -1,0 +1,53 @@
+## Versions
+## Note: Constraining lower bounds and ensuring packages install any common extras tends to assist with pip dependency resolution - in that it will error rather than backtrack to ancient Rome versions.
+## https://peps.python.org/pep-0440/#version-specifiers
+aioboto3>=11.1.1,<13.0.0 # This package is somewhat broken - >13 introduced a multi-part download that breaks with access denied errors when used with USGS landsat requester pays buckets. Issue has been reported - https://github.com/terricain/aioboto3/issues/351 20241026
+aiobotocore>=2.1.2
+boto3>=1.20.24
+botocore>=1.23.24
+copernicusmarine>=1.3.1
+dask-gateway>=2022.4.0
+dask-ml>=2023.3.24
+## ! dask/distributed/dask-cuda - are all interdependent and dask-cuda in particular pins specific versions of dask that it supports
+# In order to keep things consistent nvidia use a dependency only package - https://github.com/rapidsai/rapids-dask-dependency
+# This pins the dask/distributed versions to the specific version of dask-cuda that is in use and is where to look for the constraints
+# We mirror those constraints here so pip will use the constraints with other libraries.
+rapids-dask-dependency>=24.8
+dask-cuda==24.8.2
+dask==2024.7.1
+distributed==2024.7.1
+dask-labextension>=7.0 # jlab 4.0
+datacube-ows>=1.8.36
+# GDAL constraint comes from geobase /opt/constraints-gdal.txt. MUST be pinned to the same version or it will attempt to upgrade and likely fail due to C-Library issues
+geoviews>=1.13.0
+hdstats>=0.1.8.post1
+hera>=5.9.0
+jupyter-resource-usage>=1.0.0 # jlab 4.0
+jupyter_server>=2.0.0
+jupyter-server-proxy>=1.3.2
+jupyterlab>=4 # jlab 4.0
+planetary_computer>=1.0.0
+pyviz_comms>=3,<4 # Jupyterlab 3.x = pyviz_comms 2, Jupyterlab 34x = pyviz_comms 3
+lightly>=1.4.21
+netcdf4!=1.7.0
+notebook>=7.0 # jlab 4
+numba>=0.60.0
+numpy>=1.23.5
+openpyxl>=3.1.2
+optuna>=3.3.0
+pandas>=2 # 1.3,<1.6.0.dev0 # dask-cuda 24.2.0 (>24.4 will support pandas 2 but not released yet) 20240318
+panel!=1.4.3 # avoid bad release https://github.com/holoviz/panel/issues/6865
+pyarrow>14.0.1
+pystac-client>=0.3.5  # Required to stop odc-stac from breaking with element84 STAC API which needs an update to be compliant
+pydantic #<2,>=1.10.5 # due lightly 1.5.1  20240318
+rasterio>=1.3.2  # Following advice from https://github.com/opendatacube/datacube-ows/issues/851 Tested broken 1.3.0, 1.3.0post1, 1.3.1
+s3fs>=2023.9.0 # s3fs needs to specify the boto3 extras (done in requirements-dask.txt) in order for the dependencies to resolve.
+scikit-learn>=1.0.0
+scipy #<1.12 # 20240412 - RW - scipy.interpolate.griddata (linear1Dinterpolate to be more accurate) is broken for acolite memory usage in > 1.12.0
+setuptools_scm>=6,!=7.0.0,!=7.0.1,!=7.0.2,!=7.0.3  # Avoid a bunch of version issues that are fixed in v7.0.4
+Shapely!=1.8.3 # Avoid errant Shapely release and breaking changes release 2.0.0
+sidecar
+statsmodels>=0.14.1 # ,<0.14.2 # 0.14.2 has dependency changes for numpy which is breaking build. has issues when dask-cuda is added to mix. pip fails to resolve or worse rolls back a long long way. Forcing this constraint keeps things working. Assume its a packaging and/or pip resolver bug and just force the issue.
+tensorflow>=2.15 #,<2.15  # 2.14 uses cuda 11 >=2.15 uses cuda 12 - Cuda version must match torch if both are installed and baseimage (currently cu1108 20240319)
+torchvision>=0.16.0
+xarray>=2024.2.0

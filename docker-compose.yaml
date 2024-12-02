@@ -1,0 +1,26 @@
+services:
+  datacube:
+    build: docker/datacube
+    environment:
+      - DB_HOSTNAME=db
+      - DB_USERNAME=datacube
+      - DB_PASSWORD=datacubepassword
+      - DB_DATABASE=datacube_db
+    ports:
+      - 8888:8888
+    depends_on:
+      - db
+    # volumes:
+      # - ~/.aws:/home/jovyan/.aws
+    restart: no
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=datacube
+      - POSTGRES_PASSWORD=datacubepassword
+      - POSTGRES_DB=datacube_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

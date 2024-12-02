@@ -1,0 +1,26 @@
+{
+	"name": "odc-tutorial",
+	"dockerComposeFile": ["../docker-compose.yaml", "docker-compose.extend.yaml"],
+	"service": "datacube",
+	"shutdownAction": "stopCompose",
+	"workspaceFolder": "/home/ubuntu/odc-product-tutorial",
+	"remoteUser": "ubuntu",
+"customizations": {
+	"vscode": {
+		"extensions": [
+			"moshfeu.compare-folders",
+			"twxs.cmake",
+			"mhutchie.git-graph",
+			"charliermarsh.ruff",
+			"ephoton.indent-switcher",
+			"oderwat.indent-rainbow",
+			"ms-python.python",
+			"ms-python.vscode-pylance",
+			"Gruntfuggly.todo-tree",
+			"svipas.prettier-plus",
+			"amazonwebservices.aws-toolkit-vscode",
+			"ms-toolsai.jupyter"
+		]
+	}
+}
+}

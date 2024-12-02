@@ -1,0 +1,16 @@
+name: io_lulc_annual_v02 # common shorthand used in several metadata docs.
+description: Time series of annual global maps of land use and land cover (LULC). It currently has data from 2017-2023. The maps are derived from ESA Sentinel-2 imagery at 10m resolution. Each map is a composite of LULC predictions for 9 classes throughout the year in order to generate a representative snapshot of each year. # from the Planetary computer abstract
+metadata_type: eo3 # it's an eo3 compliant product definition
+license: CC-BY-4.0 # added a License from https://docs.impactobservatory.com/legal.html#maps-for-good.
+
+# This section is necessary for ODC 1.8 - you'd be forgiven for not noticing the implementation note in the spec.
+metadata:
+  product:
+    name: io_lulc_annual_v02 # must match the name above
+
+measurements:
+- name: land_cover_class # from the detailed product description
+  aliases: [LCC, cover_class, class] # Aliases are used for alternative forms.
+  units: "1" # required field and must be a string - 1 is a dimensionless unit. You could use "unitless" or anything you think makes sense
+  nodata: 0 # from the gdalinfo (better source) and verified it matches the detailed product description
+  dtype: uint8 # from the gdalinfo (better source) and verified it matches the detailed product description

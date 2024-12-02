@@ -1,0 +1,12 @@
+bokeh
+datacube
+datashader
+dea-tools
+eodatasets3
+holoviews
+geoviews
+hvplot
+jupyterlab
+jupyter_bokeh
+psycopg2
+pytest
