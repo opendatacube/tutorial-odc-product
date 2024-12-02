@@ -2,6 +2,7 @@ from pathlib import Path
 from tasks.common import get_logger
 import logging
 from tasks.prepare_io_lulc_annual_v02_metadata import prepare_dataset
+from concurrent.futures import ThreadPoolExecutor
 
 logger = get_logger(Path(__file__).stem, level=logging.INFO)
 
@@ -12,7 +13,7 @@ collection_path = Path('data')
 # Use the FOO measurement to generate an iterator over the unique tile ids used in the filenames
 tiles = collection_path.glob('*.tif')
 
-for tile in tiles:
+def process_tile(tile):
     tile_id = tile.stem
     logger.info(f'Processing {tile_id}')
 
@@ -21,5 +22,8 @@ for tile in tiles:
         dataset_path=str(collection_path),
         product_definition="products/impact_observatory/io_lulc_annual_v02.yaml",
     )
+
+with ThreadPoolExecutor() as executor:
+    executor.map(process_tile, tiles)
 
 logger.info("Processing complete.")

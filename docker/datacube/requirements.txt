@@ -6,7 +6,9 @@ eodatasets3
 holoviews
 geoviews
 hvplot
+ipykernel
 jupyterlab
 jupyter_bokeh
+notebook
 psycopg2
 pytest
