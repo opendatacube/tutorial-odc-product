@@ -25,7 +25,7 @@ hera>=5.9.0
 jupyter-resource-usage>=1.0.0 # jlab 4.0
 jupyter_server>=2.0.0
 jupyter-server-proxy>=1.3.2
-jupyterlab>=4 # jlab 4.0
+jupyterlab>=4.3.2 # jlab 4.0
 planetary_computer>=1.0.0
 pyviz_comms>=3,<4 # Jupyterlab 3.x = pyviz_comms 2, Jupyterlab 34x = pyviz_comms 3
 lightly>=1.4.21

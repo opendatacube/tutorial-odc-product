@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directory containing metadata files
-METADATA_DIR="/home/ubuntu/odc-product-tutorial/data"
+METADATA_DIR="./data"
 
 # Loop over each file in the metadata directory
 for metadata_file in "$METADATA_DIR"/*.yaml; do

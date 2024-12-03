@@ -1,9 +1,9 @@
 {
-	"name": "odc-tutorial",
+	"name": "tutorial-odc-product",
 	"dockerComposeFile": ["../docker-compose.yaml", "docker-compose.extend.yaml"],
 	"service": "datacube",
 	"shutdownAction": "stopCompose",
-	"workspaceFolder": "/home/ubuntu/odc-product-tutorial",
+	"workspaceFolder": "/home/ubuntu/tutorial-odc-product",
 	"remoteUser": "ubuntu",
 "customizations": {
 	"vscode": {
