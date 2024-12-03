@@ -215,7 +215,7 @@ There are several forms of available metadata:
 3. The [Impact Observatory also has a more detailed description page](https://docs.impactobservatory.com/lulc-maps/lulc-maps.html)
 3. The [MS Planetary Computer has their descroption](https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02).
 2. The GeoTIFFs contain metadata. You can use `gdalinfo` to inspect the metadata from the GeoTIFF files. This will provide information on `crs`, bounding box, pixel origin location (e.g., center of pixel or upper left corner), NoData value, and data type.
-3. The *folder* and *filenames* contain metadata! For example, `FOO_276000_3721000.tif` indicates `FOO`, and the numbers represent one corner of the bounding box.
+3. The *folder* and *filenames* contain metadata! `15M-2017.tif` is both the UTM zone and the product year.
 
 ### Key Points About the Metadata
 
