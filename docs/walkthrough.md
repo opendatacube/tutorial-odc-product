@@ -2,28 +2,30 @@
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-- [Creating *eo3* Product Definitions and indexing a local Product](#creating-eo3-product-definitions-and-indexing-a-local-product)
-  - [The *eo3* metadata specifications](#the-eo3-metadata-specifications)
-  - [*Product Definition* - making expectations **Product** specific](#product-definition---making-expectations-product-specific)
-  - [*per dataset metadata*](#per-dataset-metadata)
-  - [ODC database management - Indexing, Deleting, Updating](#odc-database-management---indexing-deleting-updating)
-- [The walkthrough - Indexing `io-lulc-annual-v02`](#the-walkthrough---indexing-io-lulc-annual-v02)
-  - [Tutorial environment](#tutorial-environment)
-  - [One time setup](#one-time-setup)
-  - [Configure VS Code environment](#configure-vs-code-environment)
-  - [Understanding the io-lulc-annual-v02 Product and Data](#understanding-the-io-lulc-annual-v02-product-and-data)
-  - [Creating a *Product Definition*](#creating-a-product-definition)
-  - [Preparing *per dataset metadata*](#preparing-per-dataset-metadata)
-  - [Processing All the Data Files](#processing-all-the-data-files)
-  - [Indexing the Product](#indexing-the-product)
-  - [Verify the product is correct with `datacube.load()`](#verify-the-product-is-correct-with-datacubeload)
-  - [When it all goes wrong - Removing the Product from the Index](#when-it-all-goes-wrong---removing-the-product-from-the-index)
-- [Administration for new products in Production](#administration-for-new-products-in-production)
-  - [Updating the Database Ancillary Tables](#updating-the-database-ancillary-tables)
-- [Theory Meets Reality](#theory-meets-reality)
-- [Choices, Choices, Choices](#choices-choices-choices)
-- [Common Errors](#common-errors)
+- [The ODC Metadata Model and Indexing Process](#the-odc-metadata-model-and-indexing-process)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Creating *eo3* Product Definitions and indexing a local Product](#creating-eo3-product-definitions-and-indexing-a-local-product)
+    - [The *eo3* metadata specifications](#the-eo3-metadata-specifications)
+    - [*Product Definition* - making expectations **Product** specific](#product-definition---making-expectations-product-specific)
+    - [*per dataset metadata*](#per-dataset-metadata)
+    - [ODC database management - Indexing, Deleting, Updating](#odc-database-management---indexing-deleting-updating)
+  - [The walkthrough - Indexing `io_lulc_annual_v02`](#the-walkthrough---indexing-io_lulc_annual_v02)
+    - [Tutorial environment](#tutorial-environment)
+    - [One time setup](#one-time-setup)
+    - [Configure VS Code environment](#configure-vs-code-environment)
+    - [Understanding the io_lulc_annual_v02 Product and Data](#understanding-the-io_lulc_annual_v02-product-and-data)
+    - [Creating a *Product Definition*](#creating-a-product-definition)
+    - [Preparing *per dataset metadata*](#preparing-per-dataset-metadata)
+    - [Processing All the Data Files](#processing-all-the-data-files)
+    - [Indexing the Product](#indexing-the-product)
+    - [Verify the product is correct with `datacube.load()`](#verify-the-product-is-correct-with-datacubeload)
+    - [When it all goes wrong - Removing the Product from the Index](#when-it-all-goes-wrong---removing-the-product-from-the-index)
+  - [Administration for new products in Production](#administration-for-new-products-in-production)
+    - [Updating the Database Ancillary Tables](#updating-the-database-ancillary-tables)
+  - [Theory Meets Reality](#theory-meets-reality)
+  - [Choices, Choices, Choices](#choices-choices-choices)
+  - [Common Errors](#common-errors)
 
 # Introduction
 
@@ -92,7 +94,7 @@ For this tutorial, we will use a Python script with some community tools and ind
 
 There are several ODC tools available for managing the ODC database once you have the metadata in place. The landscape can be somewhat chaotic due to the unique operational requirements of different ODC deployments. The scale of a collection also significantly impacts the tools and techniques used. For example, adding a single dataset via the CLI is feasible, but doing so for 1,000,000 datasets is impractically slow, even with automation, due to the lack of transaction batching. The techniques used in this tutorial are those currently employed by the EASI community. While these methods are effective, there is still room for improvement in tooling. Details will be illustrated by example in the walkthrough.
 
-# The walkthrough - Indexing `io-lulc-annual-v02`
+# The walkthrough - Indexing `io_lulc_annual_v02`
 
 ## Tutorial environment
 
@@ -197,7 +199,7 @@ For this tutorial, you will primarily use the `env`, `start`, `stop`, `delete`, 
   ```
   This differs from the default configuration in that the `PYTHONPATH` is pointing at the top level `workspaceFolder` which allows the code to use the correct module paths (e.g., tasks.eo3assemble).
 
-## Understanding the io-lulc-annual-v02 Product and Data
+## Understanding the io_lulc_annual_v02 Product and Data
 
 To create a *Product Definition* and *dataset metadta*, you need to understand two key aspects of your data:
 1. What metadata is available for the product?
@@ -207,7 +209,7 @@ To create a *Product Definition* and *dataset metadta*, you need to understand t
 
 This data is originally from a STAC indexed data source freely available on the [Microsoft Planetary Computer and is from the Impact Observatory 10m Annual Land Use Land Cover (9-class) V2 product collection](https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02). It is used as an example for local indexing with this copy and there is a matching tutorial for using it directly with ODC via STAC on the ODC github.
 
-### io-lulc-annual-v02 Metadata
+### io_lulc_annual_v02 Metadata
 
 There are several forms of available metadata:
 1. The [Sentinel Hub collection description](https://custom-scripts.sentinel-hub.com/custom-scripts/other_collections/impact-observatory/)  contains a description of the `io-lulc-annual-v02` collection and a sample Sentinel Hub script for its use.
@@ -297,7 +299,7 @@ The full sample *Product Definition* can be found in [`../products/impact_observ
 
 ## Preparing *per dataset metadata*
 
-Up to this point, we have identified important values for the **Product** as a whole (e.g., product name `io-lulc-annual-v02_io-lulc-annual-v02TYPE_c0`) and described what a dataset should contain (e.g., number and name of the `measurements`). What remains is to create a dataset metadata record for every dataset to populate the required fields from the [ODC eo3 dataset specification](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md). These fields include `measurements.path` (pointing to the location of the data file for that measurement), dataset `geometry` (with the valid data polygon), and dataset `grids` (with information on the `odc-geo.GeoBox` for the entire dataset). Each of these values is dataset-specific and is copied or derived from the source data. For example, the `geometry` valid data polygon may be supplied by the source (as it is in STAC records) or computed by analyzing all of the measurements' valid pixels and constructing a valid data polygon for _all_ measurements.
+Up to this point, we have identified important values for the **Product** as a whole (e.g., product name `io_lulc_annual_v02`) and described what a dataset should contain (e.g., number and name of the `measurements`). What remains is to create a dataset metadata record for every dataset to populate the required fields from the [ODC eo3 dataset specification](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md). These fields include `measurements.path` (pointing to the location of the data file for that measurement), dataset `geometry` (with the valid data polygon), and dataset `grids` (with information on the `odc_geo.GeoBox` for the entire dataset). Each of these values is dataset-specific and is copied or derived from the source data. For example, the `geometry` valid data polygon may be supplied by the source (as it is in STAC records) or computed by analyzing all of the measurements' valid pixels and constructing a valid data polygon for _all_ measurements.
 
 Per dataset metadata preparation is therefore the most complex component of indexing data, and it is necessarily bespoke to the source dataset. There are some commonalities and thus some common libraries in the ODC and EASI communities. In this tutorial, we'll be using the `easi_assemble.py` function, which is derived from the ODC equivalent. Alongside this, there is an `easi_prepare_template.py` file containing a template script for using the `easi_assemble.py`. The script and process are fairly straightforward and follow these steps for each dataset:
 
@@ -323,7 +325,7 @@ Per dataset metadata preparation is therefore the most complex component of inde
 
 The dataset document is written to a file and not indexed directly to the ODC database. This pattern is commonly used in the ODC community as it allows reindexing of **Products** without reanalysis and extraction of metadata if the database requires a rebuild. For a very large collections, this can be important as the reprocessing cost may be significant, and the additional storage of a small text document is usually negligible in cost.
 
-The file [`tasks/prepare_io-lulc-annual-v02TYPE_dataset_metadata.py`](../tasks/prepare_io-lulc-annual-v02TYPE_dataset_metadata.py) contains a complete example with detailed comments for the `io-lulc-annual-v02` *Product Definition*. The `tests` folder contains [a matching `pytest`](../tests/test_prepare_io-lulc-annual-v02TYPE_dataset_metadata.py) which will process a single dataset from the `io-lulc-annual-v02` data for testing.
+The file [`tasks/prepare_io_lulc_annual_v02_metadata.py`](../tasks/prepare_io_lulc_annual_v02_metadata.py) contains a complete example with detailed comments for the `io_lulc_annual_v02` *Product Definition*. The `tests` folder contains [a matching `pytest`](../tests/test_prepare_io_lulc_annual_v02_metadata.py) which will process a single dataset from the `io_lulc_annual_v02` data for testing.
 
 ### Processing All the Data Files
 
@@ -333,7 +335,7 @@ Now that we can process a single dataset, processing the entire collection invol
 2. **During Product Creation**: Often the best and simplest implementation, as all required metadata is at hand.
 3. **Argo Workflow**: For large collections and significant analysis, an Argo Workflow is a highly scalable approach (e.g., running an atmospheric correction workflow on a multi-decadal continental Landsat collection).
 
-For this tutorial, we'll use a simple Python script to wrap the [`prepare_io-lulc-annual-v02TYPE_dataset_metadata.py`](../tasks/prepare_io-lulc-annual-v02TYPE_dataset_metadata.py) function. Since the datasets are intermingled and spread across the folder structure, we can use the tile coordinates and abbreviated measurement prefixes in the filenames to identify measurements and the number of datasets. The workflow script for this can be found in [`workflows/io-lulc-annual-v02_io-lulc-annual-v02TYPE_product_metadata_generator.py`](../workflows/io-lulc-annual-v02_io-lulc-annual-v02TYPE_product_metadata_generator.py).
+For this tutorial, we'll use a simple Python script to wrap the [`prepare_io_lulc_annual_v02_metadata.py`](../tasks/prepare_io_lulc_annual_v02_metadata.py) function. Since the datasets are intermingled and spread across the folder structure, we can use the tile coordinates and abbreviated measurement prefixes in the filenames to identify measurements and the number of datasets. The workflow script for this can be found in [`workflows/io_lulc_annual_v02_product_metadata_generator.py`](../workflows/io_lulc_annual_v02_product_metadata_generator.py).
 
 ## Indexing the Product
 
@@ -377,7 +379,7 @@ There is a short bash script that will run `datacube dataset add` on all the dat
 
 After indexing, the `datacube-core API` should operate fully, e.g., `datacube.load(...)`.
 
-You can test the new product using the [`notebooks/io-lulc-annual-v02_odc.ipynb`](../notebooks/io-lulc-annual-v02_odc.ipynb). You will need to select the `localdb` kernel for the notebook created during tutorial setup so your `datacube` code will use the local database. _Use the Jupyter environment for this_ - it has better interactive visualisation support.
+You can test the new product using the [`notebooks/io_lulc_annual_v02.ipynb`](../notebooks/io_lulc_annual_v02.ipynb). You will need to select the `localdb` kernel for the notebook created during tutorial setup so your `datacube` code will use the local database. _Use the Jupyter environment for this_ - it has better interactive visualisation support.
 
 ## When it all goes wrong - Removing the Product from the Index
 
@@ -436,12 +438,15 @@ Ultimately, the choice is yours.
 ## Common Errors
 
 There are some common errors in **Product definition** creation to watch out for:
-1. Not including a collection version in the `product name` - you will update your product collection at some point and the name must be unique. Commonly a collection number is added to the name e.g., io-lulc-annual-v02_io-lulc-annual-v02TYPE_**c3**.
+1. Not including a collection version in the `product name` - you will update your product collection at some point and the name must be unique. Commonly a collection number is added to the name e.g., io_lulc_annual_v02_**c3**.
 2. Not creating a unique `UUID` for the product or `dataset_id` for datasets. The `easi_prepare_template.py` includes this code:
-  ``` python
-  # Static namespace (seed) to generate uuids for datacube indexing
-  # Get a new seed value for a new driver from uuid4()
-  UUID_NAMESPACE = None  # FILL. Get from the product family or generate a new one with uuid.UUID(seed)
-  ```
-  The `UUID` namespace (seed) needs to be **unique** in the ODC database or the dataset records will be considered part of the same product. The same is true for the `dataset_id`. It doesn't matter what it is, only that it is unique. The most common mistake here is to _copy and paste_ code from a similar product and forget to ensure these are unique for the new product. The side effects can be very difficult to detect at runtime.
+
+    ``` python
+    # Static namespace (seed) to generate uuids for datacube indexing
+    # Get a new seed value for a new driver from uuid4()
+    UUID_NAMESPACE = None  # FILL. Get from the product family or generate a new one with uuid.UUID(seed)
+    ```
+
+    The `UUID` namespace (seed) needs to be **unique** in the ODC database or the dataset records will be considered part of the same product. The same is true for the `dataset_id`. It doesn't matter what it is, only that it is unique. The most common mistake here is to _copy and paste_ code from a similar product and forget to ensure these are unique for the new product. The side effects can be very difficult to detect at runtime.
+
 3. Valid data polygon creation: When creating the valid data polygon for a dataset, it needs to be done across _all_ measurements (one valid polygon showing valid data for all measurements). There are many ways to do this: bounding box, convex hull, multi-polygon. The objective isn't perfection, but as an aid to ODC query filters to eliminate entire datasets that are not part of the output. The `easi_assemble.py` code includes several options for this calculation right down to vectorizing full valid pixel masks with multi-polygons. Given the spatial analysis required to do this, different algorithms may fail on sparse (e.g., patchy cloud) datasets. Choose the best option that works stably for your product; if that is a basic bounding box, it will still serve its purpose.
