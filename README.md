@@ -1,4 +1,4 @@
-# Tutorial on ODC product metadata and indexing using SAMPLE WIP rasterised products example
+# Tutorial on ODC product metadata and indexing using the Impact Observatory 10m Annual Land Use Land Cover (9-class) V2 product collection as an example
 
 This tutorial has an accompanying video and [walkthrough document](docs/walkthrough.md). It includes a simple example of
 ODC product metadata handling, pointers to reference material, a walkthrough and code for a typical
