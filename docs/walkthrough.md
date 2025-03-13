@@ -29,12 +29,12 @@
 
 # Introduction
 
-Adding a product to the ODC index is theoretically simple but practically confusing, challenging, and frustrating. The similarities across products result in a call for a standard data structure, but creating Yet Another Standard often fails. Why? Decades of standards development have shown that they do not and cannot last. The data's *use* is more important than its structure and content. File formats impact performance based on storage technology (e.g., Cloud vs local disk) and usage patterns (e.g., spatial area vs deep time series). How information is queried and the data volume significantly affect how indexes and metadata content are determined. Therefore, whilst you will find similarities between products, especially of the same family (e.g., Optical Earth Observation data will be more similar than LiDAR), there will inevitably be minor differences, and even more if you require a low level details to be queried.
+Adding a product to the ODC index appears straightforward in theory but often proves confusing and challenging in practice. While similarities across products naturally suggest the need for standardization, experience shows that rigid standards rarely endure. Why is this? The utility of data—how it's actually used—ultimately matters more than its structure. Performance considerations vary significantly based on storage technology (cloud versus local disk) and usage patterns (broad spatial coverage versus deep time series analysis). The way information is queried and the volume of data profoundly influence how indexes and metadata should be structured. As a result, while products within the same family share similarities (e.g., Optical Earth Observation data will be more similar than LiDAR) , you'll inevitably encounter variations, particularly when detailed, low-level querying is required.
 
 
 ## Creating *eo3* Product Definitions and indexing a local Product
 
-This tutorial focuses on how to add your local *Product* to the ODC index using *eo3* metadata so it can be used with `datacube-core` and other applications in the ODC ecosystem (e.g., `datacube-explorer` and `datacube-ows`).
+This tutorial will guide you through adding your local *Product* to the ODC index using the *eo3* metadata standard. Following this process ensures your data will be compatible with `datacube-core` and integrate seamlessly with other applications in the ODC ecosystem, including `datacube-explorer` and `datacube-ows`.
 
 The process is straightforward:
 1. Create an *eo3 Product schema* compliant *Product Definition*.
