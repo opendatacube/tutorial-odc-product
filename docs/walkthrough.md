@@ -51,20 +51,18 @@ The complete product addition workflow consists of:
 
 ### The *EO3* metadata specifications
 
-The [*eo3 Product*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION-odc-product.md) and [*eo3 Dataset*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md) metadata types serve as standardized containers for ODC geo-data resource metadata. These specifications, along with utilities for implementing them, are maintained in the  [ODC eo3 repository](https://github.com/opendatacube/eo3/).
+The [*EO3 Product*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION-odc-product.md) and [*EO3 Dataset*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md) metadata types serve as standardized containers for ODC geo-data resource metadata. These specifications, along with utilities for implementing them, are maintained in the  [ODC eo3 repository](https://github.com/opendatacube/eo3/).
 
 The eo3 metadata framework includes several fields that are essential for the proper functioning of the datacube-core library. These critical fields include id (a unique identifier), Product (the product name), crs (coordinate reference system), grid (spatial grid definition), properties (temporal information and other metadata), and measurements (band details including names, units, and file locations).
 <!-- Add why these fields are essential -->
 
 
-
 # Dataset Documents
 
 ### *per dataset metadata*
+While the *Product Definition* establishes the structure and access patterns for our *collection* of datasets, it does not specify the location of individual data files or their specific metadata. For this, we need [*EO3 Dataset*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md) documents. These dataset-specific documents contain crucial information including file locations, storage formats, creation timestamps, the actual coordinate reference system ("crs") used, and the valid data polygon defining the spatial extent. Every data file within your product requires its own corresponding dataset document.
 
-The *Product Definition* outlines what our *collection* of datasets should contain and how users will access the data. The *Product Definition* however does not have the location of the data or the necessary metadata descripting our dataset. The final [*eo3 Dataset*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md) documents required are *specific to each dataset* and will include details such as where to find the data, the storage format, the creation datetime of the data, the actual stored `crs`, and the valid data polygon. Each data file needs its own dataset document.
-
-For this tutorial, we will use a Python script with some community tools and index a modest amount of data. Examples of more complex and highly scalable approaches can be found in the `easi-workflows` repository available to EASI Enterprise partners.
+In this tutorial, we'll implement a Python script that leverages community tools to index a manageable volume of data. For those dealing with larger datasets a more scalable approach is most likely desired.
 
 # The walkthrough - Indexing `io_lulc_annual_v02`
 
