@@ -217,3 +217,51 @@ measurements:
 ```
 
 The full sample *Product Definition* can be found in [`../products/impact_observatory/io_lulc_annual_v02.yaml`](../products/impact_observatory/io_lulc_annual_v02.yaml).
+
+
+## Updating the Database Ancillary Tables
+
+ODC deployments commonly use both the `datacube-explorer` application and `datacube-ows`. These use two additional database schemas added to the ODC core tables. When a new product or dataset is added, it is necessary to update these schemas using the associated commands from the respective application. You will need administrative privileges against the respective schemas and a running Pod containing the application libraries and cli.
+
+For `datacube-explorer` with a running Pod containing the `explorer` application:
+
+```bash
+$ cubedash-gen --no-init-database --refresh-stats <product name>
+```
+
+For `datacube-ows` with a running Pod containing the `ows` application:
+
+```bash
+$ datacube-ows-update --views
+$ datacube-ows-update <product name>
+```
+
+Several additional options exist to control how updates are performed (e.g., complete refresh, refresh since last update only, refresh `--all` products).
+
+In production these additional processes are normally automated.
+
+Some tips on choices:
+- If the data is created by you, it pays to have a _Product Governance document_ in place both for change control and for joint discussion with users to discover what is required that was missed. Keep the version in sync with the `product name` and **Product definition** in your source code repository - if you can, add the document to the source code as well!
+- If in doubt, add the metadata. Generally speaking, adding a field of metadata isn't too onerous and you are unlikely to be chided for having included something that you later discover isn't useful.
+- When using someone else's data (e.g., Landsat), you will often want to copy the source metadata into your derived product (e.g., the Sun angle is still the sun angle!). This is often more convenient for users than having to play match-up to the original data (which may have been reprocessed upstream and no longer identical anyway!).
+- Definitely borrow good ideas from other people's **Product definitions**. The Space Agencies have been doing this a long time and do have well-developed standards and governance practices (e.g., [CEOS WGISS Best Practice Guides](https://ceos.org/ourwork/workinggroups/wgiss/documents/)). Similarly, the [STAC](https://stacspec.org/en) community has gathered momentum and created some base conformance models (much of which has expanded from the original simple STAC model to include the CEOS best practices). None are perfect. Some are complex. It depends on the use-cases they are developed to support.
+
+Ultimately, the choice is yours.
+
+**Tip:** Did you know the **product definitions** and **dataset documents** are available from any `odc-explorer` interface. Here's an example for [Digital Earth Australia Landsat 9c ard 3](https://explorer.dea.ga.gov.au/products/ga_ls9c_ard_3). At the bottom of that page is the **product definition** pretty printed (Click the [raw](https://explorer.dea.ga.gov.au/products/ga_ls9c_ard_3.odc-product.yaml) link to get the `YAML` version). You can also get to the dataset documents from that page.
+
+## Common Errors
+
+There are some common errors in **Product definition** creation to watch out for:
+1. Not including a collection version in the `product name` - you will update your product collection at some point and the name must be unique. Commonly a collection number is added to the name e.g., io_lulc_annual_v02_**c3**.
+2. Not creating a unique `UUID` for the product or `dataset_id` for datasets. The `easi_prepare_template.py` includes this code:
+
+    ``` python
+    # Static namespace (seed) to generate uuids for datacube indexing
+    # Get a new seed value for a new driver from uuid4()
+    UUID_NAMESPACE = None  # FILL. Get from the product family or generate a new one with uuid.UUID(seed)
+    ```
+
+    The `UUID` namespace (seed) needs to be **unique** in the ODC database or the dataset records will be considered part of the same product. The same is true for the `dataset_id`. It doesn't matter what it is, only that it is unique. The most common mistake here is to _copy and paste_ code from a similar product and forget to ensure these are unique for the new product. The side effects can be very difficult to detect at runtime.
+
+3. Valid data polygon creation: When creating the valid data polygon for a dataset, it needs to be done across _all_ measurements (one valid polygon showing valid data for all measurements). There are many ways to do this: bounding box, convex hull, multi-polygon. The objective isn't perfection, but as an aid to ODC query filters to eliminate entire datasets that are not part of the output. The `easi_assemble.py` code includes several options for this calculation right down to vectorizing full valid pixel masks with multi-polygons. Given the spatial analysis required to do this, different algorithms may fail on sparse (e.g., patchy cloud) datasets. Choose the best option that works stably for your product; if that is a basic bounding box, it will still serve its purpose.

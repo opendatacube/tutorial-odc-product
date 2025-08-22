@@ -68,24 +68,23 @@ In this tutorial, we'll implement a Python script that leverages community tools
 
 ## Understanding the io_lulc_annual_v02 Product and Data
 
-To create a *Product Definition* and *dataset metadta*, you need to understand two key aspects of your data:
-1. What metadata is available for the product?
-2. How the organization and format of the data form an individual **dataset** and the **Product** collection as a whole.
+Before creating a  *Product Definition* and *dataset metadta*, you must thoroughly understand two fundamental aspects of your data:
+1. What metadata is available for and describes your product?
+2. How does the organization and format of your data define both individual datasets and the Product collection as a whole?
 
-This data is originally from a STAC indexed data source freely available on the [Microsoft Planetary Computer and is from the Impact Observatory 10m Annual Land Use Land Cover (9-class) V2 product collection](https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02). It is used as an example for local indexing with this copy and there is a matching tutorial for using it directly with ODC via STAC on the ODC github.
+The data used in this tutorial originates from the [Impact Observatory 10m Annual Land Use Land Cover (9-class) V2 product collection](https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02), available through Microsoft Planetary Computer's STAC catalog. While we're demonstrating local indexing with a downloaded copy in this tutorial, you can find a complementary guide for accessing this data directly via STAC in the ODC GitHub repository.
 
 ## Organisation and Format of the Data
 
-The [`LULC Geotiff technical specification`](https://docs.impactobservatory.com/lulc-maps/lulc-maps.html#lulc-geotiff-technical-specifications) provides details on the structure of the **Product** collection and the individual datasets. The ODC Google Drive is of the same form. Here are three key points:
+The [`LULC Geotiff technical specification`](https://docs.impactobservatory.com/lulc-maps/lulc-maps.html#lulc-geotiff-technical-specifications) thoroughly documents the structure of both the overall **Product** collection and its component datasets. The copy provided in the ODC Google Drive maintains this structure. The key organizational aspects include:
 
-1. The **Product** collection is contained within a single folder.
-2. There is 1 file per dataset Supercell with 1 `measurements` per **dataset** available (the Landcover class - `gdalinfo` confirms this).
+1. The entire **Product** collection is contained within a single folder.
+2. Impact Observatory divides there data up into areas they call Supercells. There is 1 dataset file per Supercell with 1 `measurements` per **dataset** available (the Landcover class - `gdalinfo` confirms this).
+<!-- TODO: Revise this section to be more clear how the EO3 file relates to each data set file -->
 
 ### Accessing Data
 
-To access an entire **dataset** tile for the `io-lulc-annual-v02` product, you need to collect one file only.
-
-For other products there can be many files and they may be groups entirely differently. This one is particularly simple.
+The files we are going to use for this tutorial are available in our Google Drive [here.](https://drive.google.com/drive/folders/16wfof-9IHxURAz3BqV7WK-ANNSpv7nvu?usp=sharing) For the `io-lulc-annual-v02` product, we have only a handful of files which cover our area of interest This represents a simpler case, for the instructional purpose of this tutorial, compared to many other products, which may require multiple files arranged in vastly different organizational structures. 
 
 ### Data Organisation Choices by the Provider
 
@@ -177,40 +176,6 @@ After indexing, the `datacube-core API` should operate fully, e.g., `datacube.lo
 
 You can test the new product using the [`notebooks/io_lulc_annual_v02.ipynb`](../notebooks/io_lulc_annual_v02.ipynb). You will need to select the `localdb` kernel for the notebook created during tutorial setup so your `datacube` code will use the local database. _Use the Jupyter environment for this_ - it has better interactive visualisation support.
 
-## When it all goes wrong - Removing the Product from the Index
-
-The ODC doesn't have a product deletion tool (shock horror!). Members of the ODC community have contributed scripts to manually delete an entire ODC Product and related records in ODC, Explorer, and OWS DB. The SQL scripts need to be applied in a specific order (see the [`README.md`](../tools/odc-product-delete/README.md)) and require ODC database administration privileges in the `.datacube-conf` for all tables to be removed. The EASI [`tools/delete_product.py`](../tools/delete_product.py) CLI utility simplifies this process. If all permissions are in place, running the script with the name of the product will remove it after confirmation.
-
-You may see a few errors in the SQL if the OWS and Explorer tables haven't been initialized yet. This can occur during initial product creation if you start indexing a product and discover a mistake and need to start over before running the `cubedash-gen` and `datacube-ows-update` commands. Those errors can safely be ignored under those conditions.
-
-For the tutorial you can of course just delete the entire local database using the command described earlier.
-
-# Administration for new products in Production
-
-Once your product is ready to go you will need to work with your EASI Administrator to move to production. In addition to the steps above for metadata creation and indexing your Administrator will need to address some additional actions.
-
-## Updating the Database Ancillary Tables
-
-ODC deployments commonly use both the `datacube-explorer` application and `datacube-ows`. These use two additional database schemas added to the ODC core tables. When a new product or dataset is added, it is necessary to update these schemas using the associated commands from the respective application. You will need administrative privileges against the respective schemas and a running Pod containing the application libraries and cli.
-
-For `datacube-explorer` with a running Pod containing the `explorer` application:
-
-```bash
-$ cubedash-gen --no-init-database --refresh-stats <product name>
-```
-
-For `datacube-ows` with a running Pod containing the `ows` application:
-
-```bash
-$ datacube-ows-update --views
-$ datacube-ows-update <product name>
-```
-
-Several additional options exist to control how updates are performed (e.g., complete refresh, refresh since last update only, refresh `--all` products).
-
-In production these additional processes are normally automated.
-
-
 # Theory Meets Reality
 
 The example `io-lulc-annual-v02` **Product** used in this tutorial is relatively simple, as is the process of creating the `per dataset metadata` for only 4 spatial tiles. In practice, creating a **Product definition** can require considerable research, including potential direct contact with the people who created it. It is unfortunately common to find that providers do not always make explicit information that is required for use. For example, global open EO data providers may not include information on whether the pixel location is a corner or central point. Sometimes the same provider will do so for one product and not for another, even though they use the same process for both. In other cases, you may find older portions of a collection use a different standard to newer versions (or more confusingly, reprocessed older versions use newer versions and are available in both forms!).
@@ -221,28 +186,3 @@ All this means, do your research. *Read* the Product Specification document (or 
 
 In this walkthrough, a choice was made to create a single **Product** containing all 8 `measurements`. We could just as validly have created 8 separate **Products** or several **Products** with different combinations (e.g., all the `MEASUREMENT*` together). We could also include additional metadata fields about `author`, `algorithm_version` (highly recommend including this), `cloud_cover`, `positional_uncertainty`, `type_of_device`, `device_settings`, and so on. The trick with metadata is not what the provider knows that matters, it's what the user _needs_ or _may want_ to know.
 
-Some tips on choices:
-- If the data is created by you, it pays to have a _Product Governance document_ in place both for change control and for joint discussion with users to discover what is required that was missed. Keep the version in sync with the `product name` and **Product definition** in your source code repository - if you can, add the document to the source code as well!
-- If in doubt, add the metadata. Generally speaking, adding a field of metadata isn't too onerous and you are unlikely to be chided for having included something that you later discover isn't useful.
-- When using someone else's data (e.g., Landsat), you will often want to copy the source metadata into your derived product (e.g., the Sun angle is still the sun angle!). This is often more convenient for users than having to play match-up to the original data (which may have been reprocessed upstream and no longer identical anyway!).
-- Definitely borrow good ideas from other people's **Product definitions**. The Space Agencies have been doing this a long time and do have well-developed standards and governance practices (e.g., [CEOS WGISS Best Practice Guides](https://ceos.org/ourwork/workinggroups/wgiss/documents/)). Similarly, the [STAC](https://stacspec.org/en) community has gathered momentum and created some base conformance models (much of which has expanded from the original simple STAC model to include the CEOS best practices). None are perfect. Some are complex. It depends on the use-cases they are developed to support.
-
-Ultimately, the choice is yours.
-
-**Tip:** Did you know the **product definitions** and **dataset documents** are available from any `odc-explorer` interface. Here's an example for [Digital Earth Australia Landsat 9c ard 3](https://explorer.dea.ga.gov.au/products/ga_ls9c_ard_3). At the bottom of that page is the **product definition** pretty printed (Click the [raw](https://explorer.dea.ga.gov.au/products/ga_ls9c_ard_3.odc-product.yaml) link to get the `YAML` version). You can also get to the dataset documents from that page.
-
-## Common Errors
-
-There are some common errors in **Product definition** creation to watch out for:
-1. Not including a collection version in the `product name` - you will update your product collection at some point and the name must be unique. Commonly a collection number is added to the name e.g., io_lulc_annual_v02_**c3**.
-2. Not creating a unique `UUID` for the product or `dataset_id` for datasets. The `easi_prepare_template.py` includes this code:
-
-    ``` python
-    # Static namespace (seed) to generate uuids for datacube indexing
-    # Get a new seed value for a new driver from uuid4()
-    UUID_NAMESPACE = None  # FILL. Get from the product family or generate a new one with uuid.UUID(seed)
-    ```
-
-    The `UUID` namespace (seed) needs to be **unique** in the ODC database or the dataset records will be considered part of the same product. The same is true for the `dataset_id`. It doesn't matter what it is, only that it is unique. The most common mistake here is to _copy and paste_ code from a similar product and forget to ensure these are unique for the new product. The side effects can be very difficult to detect at runtime.
-
-3. Valid data polygon creation: When creating the valid data polygon for a dataset, it needs to be done across _all_ measurements (one valid polygon showing valid data for all measurements). There are many ways to do this: bounding box, convex hull, multi-polygon. The objective isn't perfection, but as an aid to ODC query filters to eliminate entire datasets that are not part of the output. The `easi_assemble.py` code includes several options for this calculation right down to vectorizing full valid pixel masks with multi-polygons. Given the spatial analysis required to do this, different algorithms may fail on sparse (e.g., patchy cloud) datasets. Choose the best option that works stably for your product; if that is a basic bounding box, it will still serve its purpose.
