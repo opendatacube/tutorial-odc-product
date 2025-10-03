@@ -28,15 +28,22 @@
   - [Common Errors](#common-errors)
 
 # Introduction
+*Caitlin: I think this could be more direct. One or two sentences on what it means to add a product to the database -- think about explaining that this is a fundamental activity involved in managing data with ODC. I think most of the information in this paragraph really falls into the Explanation category from Diataxis, and there's not so much need to dive into it for a Tutorial. I think you want to reassure the user that they're in the right place to learn a key component of working with ODC.*
+
 Adding a product to the ODC index appears straightforward in theory but often proves confusing and challenging in practice. While similarities across products naturally suggest the need for standardization, experience shows that rigid standards rarely endure. Why is this? The utility of data—how it's actually used—ultimately matters more than its structure. Performance considerations vary significantly based on storage technology (cloud versus local disk) and usage patterns (broad spatial coverage versus deep time series analysis). The way information is queried and the volume of data profoundly influence how indexes and metadata should be structured. As a result, while products within the same family share similarities (e.g., Optical Earth Observation data will be more similar than LiDAR) , you'll inevitably encounter variations, particularly when detailed, low-level querying is required.
 
 ## Creating *EO3* Product Definitions and indexing a local Product
+*Caitlin: I think this is a great statement about what the user can expect to achieve by following the tutorial. The heading above probably isn't so helpful... perhaps just making this part of the introduction? You can have a look at what I wrote for the odc-stac tutorial to get an idea.*
 
 This tutorial will guide you through adding your local *Product* to the ODC index using the *EO3* metadata standard. Following this process ensures your data will be compatible with `datacube-core` and integrate with other applications in the ODC ecosystem, including `datacube-explorer` and `datacube-ows`.
+
+*Caitlin: calling it "the indexing process" isn't overly helpful to a user who doesn't know what indexing is -- perhaps rephrase as "Adding data to your Open Data Cube involves two main steps:"*
 
 The indexing process involves two main steps:
 1. Creating *Product Definition* that complies with the *eo3 Product schema*.
 2. Preparing *per dataset file metadata* documents that adhere to the *EO3 Dataset schema* that a general refered to as *Dataset Documents*
+
+*Caitlin: I think we could be more specific/direct with these definitions, and rather than including more explanation below, we could try moving those explanations to a different part of the documentation, and just linking to them. You can see an example of how I've defined key concepts (while keeping it brief and direct) in the odc-stac tutorial: https://opendatacube.readthedocs.io/en/latest/tutorials/odc-stac.html#stac-metadata*
 
 To understand the process, it's important to recognize three key components:
 1. *EO3* Product and Datasets schemas - These are standardized specifications defined by ODC.
@@ -51,6 +58,8 @@ The complete product addition workflow consists of:
 
 ### The *EO3* metadata specifications
 
+*Caitlin: Perhaps try and capture some of the critical information from here in the dot points above, and then link to detailed explanation where available. Users probably won't need to directly look at the EO3 repo during the tutorial, but perhaps it could be added as further reading at the end?*
+
 The [*EO3 Product*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION-odc-product.md) and [*EO3 Dataset*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md) metadata types serve as standardized containers for ODC geo-data resource metadata. These specifications, along with utilities for implementing them, are maintained in the  [ODC eo3 repository](https://github.com/opendatacube/eo3/).
 
 The eo3 metadata framework includes several fields that are essential for the proper functioning of the datacube-core library. These critical fields include id (a unique identifier), Product (the product name), crs (coordinate reference system), grid (spatial grid definition), properties (temporal information and other metadata), and measurements (band details including names, units, and file locations).
@@ -59,8 +68,12 @@ The eo3 metadata framework includes several fields that are essential for the pr
 
 # Dataset Documents
 
+*Caitlin: As above, try moving the critical information to the dot point defintions you had earlier. I think those dot points should try and say "this is what product metadata is" and "this is what dataset metadata is".*
+
 ### *per dataset metadata*
 While the *Product Definition* establishes the structure and access patterns for our *collection* of datasets, it does not specify the location of individual data files or their specific metadata. For this, we need [*EO3 Dataset*](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md) documents. These dataset-specific documents contain crucial information including file locations, storage formats, creation timestamps, the actual coordinate reference system ("crs") used, and the valid data polygon defining the spatial extent. Every data file within your product requires its own corresponding dataset document.
+
+*Caitlin: I don't think you need to say that a different approach will be needed for scaling up. You could perhaps mention this at the end of the tutorial, but mentioning it here might confuse the user and distract them from the goal of the tutorial.*
 
 In this tutorial, we'll implement a Python script that leverages community tools to index a manageable volume of data. For those dealing with larger datasets a more scalable approach is most likely desired.
 
