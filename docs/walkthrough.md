@@ -81,25 +81,32 @@ In this tutorial, we'll implement a Python script that leverages community tools
 
 ## Understanding the io_lulc_annual_v02 Product and Data
 
-Before creating a  *Product Definition* and *dataset metadta*, you must thoroughly understand two fundamental aspects of your data:
+Before creating a  *Product Definition* and *dataset metadata*, you must thoroughly understand two fundamental aspects of your data:
 1. What metadata is available for and describes your product?
 2. How does the organization and format of your data define both individual datasets and the Product collection as a whole?
+
+*Caitlin: Provide a link to the odc-stac tutorial. This can be done later when we know how we're going to integrate this tutorial into the broader documentation*
 
 The data used in this tutorial originates from the [Impact Observatory 10m Annual Land Use Land Cover (9-class) V2 product collection](https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02), available through Microsoft Planetary Computer's STAC catalog. While we're demonstrating local indexing with a downloaded copy in this tutorial, you can find a complementary guide for accessing this data directly via STAC in the ODC GitHub repository.
 
 ## Organisation and Format of the Data
+*Caitlin: Perhaps adding a picture would help? I agree that a little more explanation or direction could be added. E.g. We will create one product defintion to cover all dataset files, and one EO3 dataset document per dataset file. If you're going to mention using gdalinfo, we should demonstrate how this works, or specifically instruct the user to run it. This will mean the environment for the tutorial needs gdal. May be worth thinking if there's another way for a user to investigate the data simply.*
 
 The [`LULC Geotiff technical specification`](https://docs.impactobservatory.com/lulc-maps/lulc-maps.html#lulc-geotiff-technical-specifications) thoroughly documents the structure of both the overall **Product** collection and its component datasets. The copy provided in the ODC Google Drive maintains this structure. The key organizational aspects include:
 
 1. The entire **Product** collection is contained within a single folder.
-2. Impact Observatory divides there data up into areas they call Supercells. There is 1 dataset file per Supercell with 1 `measurements` per **dataset** available (the Landcover class - `gdalinfo` confirms this).
+2. Impact Observatory divides their data up into areas called Supercells. There is 1 dataset file per Supercell with 1 `measurement` per **dataset** available (the Landcover class - `gdalinfo` confirms this).
 <!-- TODO: Revise this section to be more clear how the EO3 file relates to each data set file -->
 
 ### Accessing Data
 
-The files we are going to use for this tutorial are available in our Google Drive [here.](https://drive.google.com/drive/folders/16wfof-9IHxURAz3BqV7WK-ANNSpv7nvu?usp=sharing) For the `io-lulc-annual-v02` product, we have only a handful of files which cover our area of interest This represents a simpler case, for the instructional purpose of this tutorial, compared to many other products, which may require multiple files arranged in vastly different organizational structures. 
+*Caitlin: I think the extra info saying that real products have many more datasets is perhaps not necessary in the context of the tutorial, it's fine to just keep the focus on the goal of the tutorial, and not worry about telling the user that it doesn't match the real world -- tutorials generally don't!*
+
+The files we are going to use for this tutorial are available in our [Google Drive](https://drive.google.com/drive/folders/16wfof-9IHxURAz3BqV7WK-ANNSpv7nvu?usp=sharing). For the `io-lulc-annual-v02` product, we have only a handful of files which cover our area of interest. This represents a simpler case, for the instructional purpose of this tutorial, compared to many other products, which may require multiple files arranged in vastly different organizational structures. 
 
 ### Data Organisation Choices by the Provider
+
+*Caitlin: I think this section could be moved out of the tutorial and into an explanation page about considerations to make when constructing metadata. I don't think it helps the user in the context of the tutorial to talk about different structures, that's something they could think about once they actually understand the end-to-end process of creating metadata and indexing*
 
 The provider has chosen to group all individual **dataset** files together. Another common approach is to have a single folder containing all measurements for a single **dataset** (as seen with Landsat data). Or by region code, or by date, or by measurements.
 
@@ -107,7 +114,11 @@ _Tip:_ Much of metadata and data organisation is based on personal preference ra
 
 ## Preparing *per dataset metadata*
 
+*Caitlin: There's no section on how to create the product definition metadata -- we should add this so that the user feels they've done something concrete with the information they learned from the data structure. Make this very explicit and step-based. You could also start by getting them to add the product definition to the database, which would give them evidence that they've achieved something.*
+
 Up to this point, we have identified important values for the **Product** as a whole (e.g., product name `io_lulc_annual_v02`) and described what a dataset should contain (e.g., number and name of the `measurements`). What remains is to create a dataset metadata record for every dataset to populate the required fields from the [ODC eo3 dataset specification](https://github.com/opendatacube/eo3/blob/develop/SPECIFICATION.md). These fields include `measurements.path` (pointing to the location of the data file for that measurement), dataset `geometry` (with the valid data polygon), and dataset `grids` (with information on the `odc_geo.GeoBox` for the entire dataset). Each of these values is dataset-specific and is copied or derived from the source data. For example, the `geometry` valid data polygon may be supplied by the source (as it is in STAC records) or computed by analyzing all of the measurements' valid pixels and constructing a valid data polygon for _all_ measurements.
+
+*Caitlin: I'll review this more once we transition to using the eo3 based scripts, rather than easi_prepare. Note that lots of the language in this section is general and abstract. It should be a specific and detailed set of instructions/steps for the user to complete. E.g. Type this here. We should be clear about how we got the information, but we should hold their hand to get it working -- not expect them to derive information from the files themselves.*
 
 Per dataset metadata preparation is therefore the most complex component of indexing data, and it is necessarily bespoke to the source dataset. There are some commonalities and thus some common libraries in the ODC and EASI communities. In this tutorial, we'll be using the `easi_assemble.py` function, which is derived from the ODC equivalent. Alongside this, there is an `easi_prepare_template.py` file containing a template script for using the `easi_assemble.py`. The script and process are fairly straightforward and follow these steps for each dataset:
 
@@ -137,6 +148,8 @@ The file [`tasks/prepare_io_lulc_annual_v02_metadata.py`](../tasks/prepare_io_lu
 
 ### Processing All the Data Files
 
+*Caitlin: For the tutorial, we should just focus on one method (I think a Python loop is most appropriate). Additional information on other ways to do this should go into an explanation doc somewhere else. I'd also be tempted to have them write the python script themselves, and have it explicitly displayed as part of the instructions, similar to the commands I provide people in the odc-stac tutorial.*
+
 Now that we can process a single dataset, processing the entire collection involves repeating the process. The method for looping over datasets depends on the number of datasets and the amount of analysis being performed. Here are three common methods used by the EASI community:
 
 1. **Simple Python Loop** (with or without parallelization): For small collections like this tutorial, this is the simplest method. It can be straightforward if a complete dataset is held in a single folder structure or more involved if a dataset is spread across folders and mixed with other datasets (as in this tutorial).
@@ -153,11 +166,15 @@ Indexing a product into the ODC database requires two steps:
 
 ### Adding the Product Definition to the ODC Database
 
+*Caitlin: as mentioned above, I would move this to a section that explicitly talks about how to write the product defintion and then have the user add it.*
+
 Once you have the **product definition** file, adding it is straightforward but requires ODC database administration privileges (not PostgreSQL server administrative privileges). Details are in the ODC documentation section on [indexing data](https://datacube-core.readthedocs.io/en/latest/installation/indexing-data/step-guide.html#loading-product-definitions). For our tutorial you have the administration privileges for the local ODC postgres database and can add the product definition:
 
 ```bash
 $ datacube product add ./products/impact_observatory/io_lulc_annual_v02.yaml
 ```
+
+*Caitlin: we should work out what kinds of mistakes they might make and turn this into a specific troubleshooting section. It might be hard for a user to realise they've made a mistake. To that point, we should also document what success looks like -- what's the output in the terminal from running this command?*
 
 If you made a mistake or otherwise change your product definition, you can update it with:
 
@@ -169,6 +186,8 @@ If you receive an `unsafe update` error message, it indicates that the definitio
 
 ### Adding Dataset Metadata Files
 
+*Caitlin: I think a lot of this content can be moved into the explanation document we've discussed. I think for this tutorial, we'd just use dataset add, and can then point them to documentation for something like s3-to-dc in the case where they might want to use metadata created by someone else, or large amounts of metadata that they've created* 
+
 With the product definition loaded, the next step is to add the **dataset metadata** files to the index. There are three different ways to index:
 
 1. One at a time using `datacube dataset add <path-to-dataset-document-yaml>`.
@@ -176,6 +195,8 @@ With the product definition loaded, the next step is to add the **dataset metada
 3. Programmatically via the ODC datacube-core API.
 
 The primary difference between these approaches is performance at scale and ease of use. Indexing is a transactional database operation, and doing them in batches is considerably faster than one at a time. `datacube dataset add` and `s3-to-dc` both add one at a time, but `s3-to-dc` uses parallel operations, making it slightly faster. The `easi-workflows` are beginning to replace `s3-to-dc` with new programmatic variants that include batch transactions and parallelization, making them several orders of magnitude faster.
+
+*Caitlin: get them to write this script and then run it, again explaining what the expected outcome is.*
 
 There is a short bash script that will run `datacube dataset add` on all the data files [here](../workflows/add_io-lulc-annual-v02_datasets_to_odc_db.sh). You can run it with;
 
@@ -190,6 +211,8 @@ After indexing, the `datacube-core API` should operate fully, e.g., `datacube.lo
 You can test the new product using the [`notebooks/io_lulc_annual_v02.ipynb`](../notebooks/io_lulc_annual_v02.ipynb). You will need to select the `localdb` kernel for the notebook created during tutorial setup so your `datacube` code will use the local database. _Use the Jupyter environment for this_ - it has better interactive visualisation support.
 
 # Theory Meets Reality
+
+*Caitlin: I think this section can be simplified and made more constructive for the user, in terms of thinking about next steps for extending their own capabilities now that they have a solid foundation to work from. We can come back to this section much later.* 
 
 The example `io-lulc-annual-v02` **Product** used in this tutorial is relatively simple, as is the process of creating the `per dataset metadata` for only 4 spatial tiles. In practice, creating a **Product definition** can require considerable research, including potential direct contact with the people who created it. It is unfortunately common to find that providers do not always make explicit information that is required for use. For example, global open EO data providers may not include information on whether the pixel location is a corner or central point. Sometimes the same provider will do so for one product and not for another, even though they use the same process for both. In other cases, you may find older portions of a collection use a different standard to newer versions (or more confusingly, reprocessed older versions use newer versions and are available in both forms!).
 
